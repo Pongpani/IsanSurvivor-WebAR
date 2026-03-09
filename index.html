@@ -17,13 +17,13 @@
       font-family: 'Prompt', sans-serif;
     }
 
-    /* --- ส่วนที่ 1: หน้า Welcome Screen (ให้รายละเอียดก่อนเล่น) --- */
+    /* --- ส่วนที่ 1: หน้า Welcome Screen --- */
     #welcome-screen {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
       background: linear-gradient(135deg, #1a1a1a 0%, #3a0000 100%);
       color: white;
-      z-index: 9999; /* ลอยอยู่บนสุดบังกล้องไว้ก่อน */
+      z-index: 9999;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -31,6 +31,27 @@
       padding: 20px;
       text-align: center;
       box-sizing: border-box;
+    }
+
+    /* คลาสสำหรับจัดเรียงโลโก้ ซ้าย-ขวา */
+    .logo-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      max-width: 400px;
+      margin-bottom: 20px;
+      padding: 0 10px;
+    }
+
+    .top-logo {
+      height: 50px;
+      max-width: 48%;
+      object-fit: contain;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 5px;
+      border-radius: 8px;
+      box-shadow: 0px 4px 6px rgba(0,0,0,0.5);
     }
 
     .project-logo {
@@ -79,15 +100,11 @@
     }
     .btn-start:active { transform: scale(0.95); }
 
-    .dev-credit {
-      margin-top: 30px;
-      font-size: 12px;
-      color: #888;
-    }
+    .dev-credit { margin-top: 30px; font-size: 12px; color: #888; }
 
-    /* --- ส่วนที่ 2: UI กล่องข้อความ AR (ซ่อนไว้ก่อน จะโชว์ตอนกดเริ่ม) --- */
+    /* --- ส่วนที่ 2: UI กล่องข้อความ AR --- */
     #ar-ui-container {
-      display: none; /* ซ่อนไว้ก่อน */
+      display: none; 
       position: absolute;
       bottom: 20px;
       left: 50%;
@@ -115,12 +132,18 @@
 <body>
 
   <div id="welcome-screen">
+    
+    <div class="logo-header">
+      <img src="team-logo.jpg" alt="Isan Survivor Logo" class="top-logo">
+      <img src="project-logo.jpg" alt="ISAN ZERO OV Logo" class="top-logo">
+    </div>
+
     <div class="project-logo">🥩 Isan Survivor</div>
     <div class="hackathon-badge">🏆 โครงการ ISAN ZERO OV MEDIA HACKATHON</div>
     
     <div class="details-box">
       <h3>⚠️ สแกนจานมรณะ ทะลวงภัยเงียบ</h3>
-      <p>โปรเจกต์นี้จะพาทุกท่านไปสำรวจความน่ากลัวของ "พยาธิใบไม้ตับ" และ "มะเร็งท่อน้ำดี" ที่แฝงมากับวัฒนธรรมการกินก้อยปลาดิบ ผ่านเทคโนโลยี AR (Augmented Reality)</p>
+      <p>โปรเจกต์นี้จะพาทุกท่านไปสำรวจความน่ากลัวของ "พยาธิใบไม้ตับ" และ "มะเร็งท่อน้ำดี" ที่แฝงมากับวัฒนธรรมการกินก้อยปลาดิบ ผ่านเทคโนโลยี AR</p>
       <b>วิธีใช้งาน:</b>
       <ul>
         <li>กดปุ่ม "เริ่มสแกน AR" ด้านล่าง</li>
@@ -149,22 +172,29 @@
   </div>
 
   <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false; trackingMethod: best;">
+    
+    <a-assets>
+      <a-asset-item id="liver-model" src="liver.glb"></a-asset-item>
+    </a-assets>
+
     <a-marker preset="hiro">
-      <a-box position="0 0.5 0" material="color: red;" animation="property: rotation; to: 0 360 0; loop: true; dur: 5000;"></a-box>
+      <a-entity 
+        gltf-model="#liver-model" 
+        scale="2 2 2" 
+        position="0 0.5 0" 
+        animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear;">
+      </a-entity>
     </a-marker>
+    
     <a-entity camera></a-entity>
   </a-scene>
 
   <script>
-    // ฟังก์ชันกดเริ่มเล่น
     function startAR() {
-      // ซ่อนหน้า Welcome Screen
       document.getElementById("welcome-screen").style.display = "none";
-      // โชว์หน้า UI การ์ด
       document.getElementById("ar-ui-container").style.display = "block";
     }
 
-    // ข้อมูลการ์ดทั้ง 4 หน้า
     const cards = [
       { title: "🐟 จุดเริ่มต้น (วงจรพาหะ)", desc: `"รู้หรือไม่? พยาธิใบไม้ตับซ่อนตัวอยู่ในเนื้อของ ปลาน้ำจืดเกล็ดขาว (เช่น ปลาตะเพียน ปลาสร้อย) การกินก้อยปลาดิบ ปลาส้มดิบ คือการรับพยาธิเข้าสู่ร่างกายโดยตรง!"`, color: "#00aaff" },
       { title: "⏳ ภัยเงียบ (ระยะฟักตัว)", desc: `"พยาธิ 1 ตัว มีชีวิตอยู่ได้หลายปี มันจะทำให้ท่อน้ำดีอักเสบเรื้อรัง... กระบวนการนี้กินเวลาฟักตัวนานถึง 20 ปี ก่อนจะกลายเป็น มะเร็งท่อน้ำดี โดยไม่มีอาการเตือน!"`, color: "#ffaa00" },
