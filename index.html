@@ -9,127 +9,159 @@
   <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;800&display=swap');
     
-    body {
-      margin: 0;
-      overflow: hidden;
-      font-family: 'Prompt', sans-serif;
+    body { margin: 0; overflow: hidden; font-family: 'Prompt', sans-serif; background-color: #000; }
+
+    /* --- อัปเกรดหน้า Welcome Screen --- */
+    #welcome-screen { 
+      position: absolute; 
+      top: 0; left: 0; width: 100%; height: 100%; 
+      /* พื้นหลังแบบเรืองแสงตรงกลาง */
+      background: radial-gradient(circle at center, #3a0d0d 0%, #0a0a0a 80%);
+      color: white; 
+      z-index: 9999; 
+      display: flex; 
+      flex-direction: column; 
+      justify-content: center; 
+      align-items: center; 
+      padding: 20px; 
+      text-align: center; 
+      box-sizing: border-box; 
     }
 
-    /* --- ส่วนที่ 1: หน้า Welcome Screen (ให้รายละเอียดก่อนเล่น) --- */
-    #welcome-screen {
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(135deg, #1a1a1a 0%, #3a0000 100%);
-      color: white;
-      z-index: 9999; /* ลอยอยู่บนสุดบังกล้องไว้ก่อน */
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-      text-align: center;
-      box-sizing: border-box;
+    .logo-header { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      width: 100%; 
+      max-width: 400px; 
+      margin-bottom: 20px; 
+      padding: 0 10px; 
+      animation: fadeInDown 1s ease-out; /* แอนิเมชันลอยลงมา */
     }
 
-    .project-logo {
-      font-size: 32px;
-      font-weight: 600;
-      color: #ff4444;
-      margin-bottom: 10px;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    .top-logo { 
+      height: 55px; 
+      max-width: 48%; 
+      object-fit: contain; 
+      background: rgba(255, 255, 255, 0.95); 
+      padding: 8px; 
+      border-radius: 12px; 
+      box-shadow: 0px 8px 15px rgba(0,0,0,0.6); 
     }
 
-    .hackathon-badge {
-      background-color: #ffaa00;
-      color: #000;
-      padding: 5px 15px;
-      border-radius: 20px;
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 20px;
+    .project-logo { 
+      font-size: 38px; 
+      font-weight: 800; 
+      color: #ff3333; 
+      margin-bottom: 5px; 
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      text-shadow: 0 0 15px rgba(255, 51, 51, 0.5); /* เรืองแสง */
+      animation: fadeInUp 1s ease-out 0.2s both;
     }
 
-    .details-box {
-      background: rgba(0,0,0,0.5);
-      border: 1px solid #555;
-      border-radius: 10px;
-      padding: 20px;
-      max-width: 400px;
-      margin-bottom: 30px;
+    .hackathon-badge { 
+      background: linear-gradient(90deg, #ffaa00, #ff7700);
+      color: #000; 
+      padding: 6px 20px; 
+      border-radius: 20px; 
+      font-size: 14px; 
+      font-weight: 800; 
+      margin-bottom: 25px; 
+      box-shadow: 0 4px 10px rgba(255, 170, 0, 0.3);
+      animation: fadeInUp 1s ease-out 0.4s both;
     }
 
-    .details-box h3 { margin-top: 0; color: #00cc66; }
-    .details-box p { font-size: 14px; line-height: 1.6; color: #ccc; text-align: left; }
-    .details-box ul { font-size: 14px; color: #ccc; text-align: left; padding-left: 20px; }
-
-    .btn-start {
-      background: #ff4444;
-      color: white;
-      border: none;
-      padding: 15px 40px;
-      font-size: 18px;
-      font-weight: 600;
-      border-radius: 30px;
-      cursor: pointer;
-      box-shadow: 0 4px 15px rgba(255, 68, 68, 0.4);
-      transition: 0.3s;
-      font-family: 'Prompt', sans-serif;
+    /* กล่องข้อความสไตล์กระจกฝ้า (Glassmorphism) */
+    .details-box { 
+      background: rgba(30, 10, 10, 0.6); 
+      backdrop-filter: blur(10px); /* ทำเบลอฉากหลัง */
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 68, 68, 0.3); 
+      border-radius: 15px; 
+      padding: 25px; 
+      max-width: 420px; 
+      margin-bottom: 35px; 
+      box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+      animation: fadeInUp 1s ease-out 0.6s both;
     }
+
+    .details-box h3 { margin-top: 0; color: #00ff88; font-size: 20px; letter-spacing: 1px;}
+    .details-box p { font-size: 15px; line-height: 1.6; color: #ddd; text-align: left; }
+    .details-box ul { font-size: 14px; color: #ddd; text-align: left; padding-left: 20px; margin-bottom: 0;}
+    .details-box li { margin-bottom: 8px; }
+
+    /* ปุ่มสแกนแบบกระพริบดึงดูดสายตา */
+    .btn-start { 
+      background: linear-gradient(135deg, #ff0000, #aa0000); 
+      color: white; 
+      border: none; 
+      padding: 16px 45px; 
+      font-size: 20px; 
+      font-weight: 800; 
+      border-radius: 30px; 
+      cursor: pointer; 
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.5); 
+      transition: all 0.3s ease; 
+      font-family: 'Prompt', sans-serif; 
+      animation: pulseBtn 2s infinite, fadeInUp 1s ease-out 0.8s both;
+    }
+    .btn-start:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(255, 0, 0, 0.8); }
     .btn-start:active { transform: scale(0.95); }
 
-    .dev-credit {
-      margin-top: 30px;
-      font-size: 12px;
-      color: #888;
+    .dev-credit { margin-top: 30px; font-size: 12px; color: #666; animation: fadeInUp 1s ease-out 1s both;}
+
+    /* Keyframes แอนิเมชัน */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulseBtn {
+      0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); }
+      70% { box-shadow: 0 0 0 15px rgba(255, 0, 0, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
     }
 
-    /* --- ส่วนที่ 2: UI กล่องข้อความ AR (ซ่อนไว้ก่อน จะโชว์ตอนกดเริ่ม) --- */
-    #ar-ui-container {
-      display: none; /* ซ่อนไว้ก่อน */
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 90%;
-      max-width: 400px;
-      background: rgba(20, 20, 20, 0.9);
-      border: 2px solid #ff4444;
-      border-radius: 15px;
-      color: white;
-      padding: 20px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-      z-index: 999;
-      box-sizing: border-box;
-    }
-    .card-header { display: flex; justify-content: space-between; border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 10px; }
-    .card-title { font-size: 18px; font-weight: bold; margin: 0; }
-    .card-body { font-size: 14px; line-height: 1.5; min-height: 70px; }
+    /* --- ส่วน UI กล่องข้อความ AR ด้านล่าง (เหมือนเดิม) --- */
+    #ar-ui-container { display: none; position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: rgba(15, 15, 15, 0.95); border: 2px solid #ff3333; border-radius: 15px; color: white; padding: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.8); z-index: 999; box-sizing: border-box; backdrop-filter: blur(5px); }
+    .card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 12px; }
+    .card-title { font-size: 18px; font-weight: 800; margin: 0; }
+    .card-body { font-size: 15px; line-height: 1.6; min-height: 75px; color: #eee; }
     .card-footer { display: flex; justify-content: space-between; margin-top: 15px; }
-    .nav-btn { background: #333; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-family: 'Prompt'; }
-    .btn-next { background: #ff4444; font-weight: bold; }
+    .nav-btn { background: #333; color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-family: 'Prompt'; font-weight: 600; transition: 0.2s; }
+    .nav-btn:active { transform: scale(0.95); }
+    .btn-next { background: #ff3333; font-weight: 800; box-shadow: 0 4px 10px rgba(255, 51, 51, 0.4); }
   </style>
 </head>
 
 <body>
 
   <div id="welcome-screen">
-    <div class="project-logo">🥩 Isan Survivor</div>
-    <div class="hackathon-badge">🏆 โครงการ ISAN ZERO OV MEDIA HACKATHON</div>
+    <div class="logo-header">
+      <img src="team-logo.jpg" alt="Isan Survivor" class="top-logo" onerror="this.style.display='none'">
+      <img src="project-logo.jpg" alt="ISAN ZERO OV" class="top-logo" onerror="this.style.display='none'">
+    </div>
+    
+    <div class="project-logo">Isan Survivor</div>
+    <div class="hackathon-badge">🏆 ISAN ZERO OV MEDIA HACKATHON</div>
     
     <div class="details-box">
       <h3>⚠️ สแกนจานมรณะ ทะลวงภัยเงียบ</h3>
-      <p>โปรเจกต์นี้จะพาทุกท่านไปสำรวจความน่ากลัวของ "พยาธิใบไม้ตับ" และ "มะเร็งท่อน้ำดี" ที่แฝงมากับวัฒนธรรมการกินก้อยปลาดิบ ผ่านเทคโนโลยี AR (Augmented Reality)</p>
+      <p>โปรเจกต์นี้จะพาทุกท่านไปสำรวจความน่ากลัวของ "พยาธิใบไม้ตับ" และ "มะเร็งท่อน้ำดี" ที่แฝงมากับวัฒนธรรมการกินก้อยปลาดิบ</p>
       <b>วิธีใช้งาน:</b>
       <ul>
-        <li>กดปุ่ม "เริ่มสแกน AR" ด้านล่าง</li>
-        <li>อนุญาตให้เบราว์เซอร์เข้าถึงกล้องถ่ายรูป</li>
-        <li>นำกล้องไปส่องที่รูปภาพ Marker (Hiro)</li>
-        <li>อ่านข้อมูลบนการ์ดด้านล่างเพื่อทำความเข้าใจโรค</li>
+        <li>กดปุ่ม <b>"เริ่มสแกน AR"</b> ด้านล่าง</li>
+        <li>อนุญาตให้เบราว์เซอร์เปิดกล้อง</li>
+        <li>นำกล้องไปส่องที่รูปภาพ <b>Marker (Hiro)</b></li>
       </ul>
     </div>
-
+    
     <button class="btn-start" onclick="startAR()">📸 เริ่มสแกน AR</button>
     <div class="dev-credit">Developed by Bass (Solo Dev) | Computer Science Student</div>
   </div>
@@ -149,22 +181,28 @@
   </div>
 
   <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false; trackingMethod: best;">
+    <a-assets>
+      <a-asset-item id="asset-model-0" src="model1.glb"></a-asset-item>
+      <a-asset-item id="asset-model-1" src="model2.glb"></a-asset-item>
+      <a-asset-item id="asset-model-2" src="model3.glb"></a-asset-item>
+      <a-asset-item id="asset-model-3" src="model4.glb"></a-asset-item>
+    </a-assets>
+
     <a-marker preset="hiro">
-      <a-box position="0 0.5 0" material="color: red;" animation="property: rotation; to: 0 360 0; loop: true; dur: 5000;"></a-box>
+      <a-entity id="ar-model-0" gltf-model="#asset-model-0" scale="2 2 2" position="0 0.5 0" visible="true" animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear;"></a-entity>
+      <a-entity id="ar-model-1" gltf-model="#asset-model-1" scale="2 2 2" position="0 0.5 0" visible="false" animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear;"></a-entity>
+      <a-entity id="ar-model-2" gltf-model="#asset-model-2" scale="2 2 2" position="0 0.5 0" visible="false" animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear;"></a-entity>
+      <a-entity id="ar-model-3" gltf-model="#asset-model-3" scale="2 2 2" position="0 0.5 0" visible="false" animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear;"></a-entity>
     </a-marker>
     <a-entity camera></a-entity>
   </a-scene>
 
   <script>
-    // ฟังก์ชันกดเริ่มเล่น
     function startAR() {
-      // ซ่อนหน้า Welcome Screen
       document.getElementById("welcome-screen").style.display = "none";
-      // โชว์หน้า UI การ์ด
       document.getElementById("ar-ui-container").style.display = "block";
     }
 
-    // ข้อมูลการ์ดทั้ง 4 หน้า
     const cards = [
       { title: "🐟 จุดเริ่มต้น (วงจรพาหะ)", desc: `"รู้หรือไม่? พยาธิใบไม้ตับซ่อนตัวอยู่ในเนื้อของ ปลาน้ำจืดเกล็ดขาว (เช่น ปลาตะเพียน ปลาสร้อย) การกินก้อยปลาดิบ ปลาส้มดิบ คือการรับพยาธิเข้าสู่ร่างกายโดยตรง!"`, color: "#00aaff" },
       { title: "⏳ ภัยเงียบ (ระยะฟักตัว)", desc: `"พยาธิ 1 ตัว มีชีวิตอยู่ได้หลายปี มันจะทำให้ท่อน้ำดีอักเสบเรื้อรัง... กระบวนการนี้กินเวลาฟักตัวนานถึง 20 ปี ก่อนจะกลายเป็น มะเร็งท่อน้ำดี โดยไม่มีอาการเตือน!"`, color: "#ffaa00" },
@@ -182,14 +220,27 @@
       document.getElementById("ui-counter").innerText = (currentIndex + 1) + "/" + cards.length;
       document.getElementById("btn-prev").style.visibility = (currentIndex === 0) ? "hidden" : "visible";
       
+      for(let i = 0; i < 4; i++) {
+        let modelEntity = document.getElementById("ar-model-" + i);
+        if(modelEntity) {
+          if(i === currentIndex) {
+            modelEntity.setAttribute("visible", "true");
+          } else {
+            modelEntity.setAttribute("visible", "false");
+          }
+        }
+      }
+
       let btnNext = document.getElementById("btn-next");
       if (currentIndex === cards.length - 1) {
         btnNext.innerText = "สนใจเล่น VR ติดต่อที่บูธ! 🎮";
         btnNext.style.background = "#00cc66";
+        btnNext.style.boxShadow = "0 4px 10px rgba(0, 204, 102, 0.4)";
         btnNext.onclick = function() { alert("เชิญสัมผัสประสบการณ์เต็มรูปแบบในแว่น VR ที่บูธของเราครับ!"); };
       } else {
         btnNext.innerHTML = "ถัดไป &raquo;";
-        btnNext.style.background = "#ff4444";
+        btnNext.style.background = "#ff3333";
+        btnNext.style.boxShadow = "0 4px 10px rgba(255, 51, 51, 0.4)";
         btnNext.onclick = function() { changeCard(1); };
       }
     }
