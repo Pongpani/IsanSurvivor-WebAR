@@ -8,110 +8,175 @@
   <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
   <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 
+  <!-- คอมโพเนนต์เขียนเอง: สำหรับปัดหน้าจอเพื่อหมุนโมเดล (รองรับทั้งเมาส์คอมและนิ้วมือถือ) -->
+  <script>
+    AFRAME.registerComponent('drag-rotate', {
+      schema: { speed: { default: 1 } },
+      init: function () {
+        this.isDragging = false;
+        this.previousPosition = null;
+
+        const onDown = (e) => {
+          this.isDragging = true;
+          this.previousPosition = this.getMousePosition(e);
+        };
+
+        const onUp = () => {
+          this.isDragging = false;
+          this.previousPosition = null;
+        };
+
+        const onMove = (e) => {
+          if (!this.isDragging || !this.previousPosition) return;
+          const currentPosition = this.getMousePosition(e);
+          const deltaX = currentPosition.x - this.previousPosition.x;
+          const deltaY = currentPosition.y - this.previousPosition.y;
+          
+          // เลื่อนแนวนอน -> หมุนแกน Y (ซ้าย-ขวา)
+          this.el.object3D.rotation.y += deltaX * this.data.speed * 0.01;
+          // เลื่อนแนวตั้ง -> หมุนแกน X (คว่ำ-หงาย)
+          this.el.object3D.rotation.x += deltaY * this.data.speed * 0.01;
+          
+          this.previousPosition = currentPosition;
+        };
+
+        // ผูก Event ฝั่ง Computer (Mouse)
+        window.addEventListener('mousedown', onDown);
+        window.addEventListener('mouseup', onUp);
+        window.addEventListener('mousemove', onMove);
+
+        // ผูก Event ฝั่ง Mobile (Touch)
+        window.addEventListener('touchstart', onDown, {passive: true});
+        window.addEventListener('touchend', onUp);
+        window.addEventListener('touchmove', onMove, {passive: true});
+      },
+      getMousePosition: function(e) {
+        if (e.touches && e.touches.length > 0) {
+          return { x: e.touches[0].pageX, y: e.touches[0].pageY };
+        }
+        return { x: e.pageX, y: e.pageY };
+      }
+    });
+
+    // คอมโพเนนต์ หมุนอัตโนมัติ (แต่ถ้าเอานิ้วไปแตะหมุนแกน Y จะบวกเพิ่มแทน)
+    AFRAME.registerComponent('auto-spin', {
+      schema: { speed: { default: 0.5 } },
+      tick: function (time, timeDelta) {
+        // ให้มันค่อยๆ หมุนไปเรื่อยๆ ตามแกน Y
+        this.el.object3D.rotation.y += this.data.speed * (timeDelta / 1000);
+      }
+    });
+  </script>
+
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;800&display=swap');
     
     body { margin: 0; overflow: hidden; font-family: 'Prompt', sans-serif; background-color: #000; }
 
-    /* --- อัปเกรดหน้า Welcome Screen --- */
+    /* แก้บัค AR.js จอดำ (สำคัญมาก) - แก้อาการ A-Frame ซ่อนกล้องเอง */
+    .a-canvas { display: block !important; }
+
+    /* --- อัปเกรดหน้า Welcome Screen (ธีมพื้นขาวตามรีเควส) --- */
     #welcome-screen { 
       position: absolute; 
       top: 0; left: 0; width: 100%; height: 100%; 
-      /* พื้นหลังแบบเรืองแสงตรงกลาง */
-      background: radial-gradient(circle at center, #3a0d0d 0%, #0a0a0a 80%);
-      color: white; 
+      background: #ffffff; /* เปลี่ยนเป็นพื้นหลังสีขาว */
+      color: #333; 
       z-index: 9999; 
       display: flex; 
       flex-direction: column; 
-      justify-content: center; 
+      justify-content: space-between; 
       align-items: center; 
       padding: 20px; 
       text-align: center; 
       box-sizing: border-box; 
     }
 
-    .logo-header { 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      width: 100%; 
-      max-width: 400px; 
-      margin-bottom: 20px; 
-      padding: 0 10px; 
-      animation: fadeInDown 1s ease-out; /* แอนิเมชันลอยลงมา */
+    .main-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      width: 100%;
     }
 
-    .top-logo { 
-      height: 55px; 
-      max-width: 48%; 
+    .main-neon-logo { 
+      width: 90%; 
+      max-width: 350px; 
       object-fit: contain; 
-      background: rgba(255, 255, 255, 0.95); 
-      padding: 8px; 
-      border-radius: 12px; 
-      box-shadow: 0px 8px 15px rgba(0,0,0,0.6); 
+      margin-bottom: 10px; 
+      animation: fadeInDown 1s ease-out; 
     }
 
     .project-logo { 
-      font-size: 38px; 
+      font-size: 24px; 
       font-weight: 800; 
-      color: #ff3333; 
+      color: #cc0000; 
       margin-bottom: 5px; 
       text-transform: uppercase;
-      letter-spacing: 2px;
-      text-shadow: 0 0 15px rgba(255, 51, 51, 0.5); /* เรืองแสง */
+      letter-spacing: 1px;
       animation: fadeInUp 1s ease-out 0.2s both;
     }
 
     .hackathon-badge { 
       background: linear-gradient(90deg, #ffaa00, #ff7700);
-      color: #000; 
+      color: #fff; 
       padding: 6px 20px; 
       border-radius: 20px; 
-      font-size: 14px; 
+      font-size: 13px; 
       font-weight: 800; 
-      margin-bottom: 25px; 
+      margin-bottom: 20px; 
       box-shadow: 0 4px 10px rgba(255, 170, 0, 0.3);
       animation: fadeInUp 1s ease-out 0.4s both;
     }
 
-    /* กล่องข้อความสไตล์กระจกฝ้า (Glassmorphism) */
+    /* กล่องข้อความสไตล์คลีน */
     .details-box { 
-      background: rgba(30, 10, 10, 0.6); 
-      backdrop-filter: blur(10px); /* ทำเบลอฉากหลัง */
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 68, 68, 0.3); 
+      background: #ffffff; 
+      border: 1px solid #eee; 
       border-radius: 15px; 
-      padding: 25px; 
+      padding: 20px 25px; 
       max-width: 420px; 
-      margin-bottom: 35px; 
-      box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+      margin-bottom: 25px; 
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
       animation: fadeInUp 1s ease-out 0.6s both;
     }
 
-    .details-box h3 { margin-top: 0; color: #00ff88; font-size: 20px; letter-spacing: 1px;}
-    .details-box p { font-size: 15px; line-height: 1.6; color: #ddd; text-align: left; }
-    .details-box ul { font-size: 14px; color: #ddd; text-align: left; padding-left: 20px; margin-bottom: 0;}
-    .details-box li { margin-bottom: 8px; }
+    .details-box h3 { margin-top: 0; color: #00aa55; font-size: 18px; letter-spacing: 1px;}
+    .details-box p { font-size: 14px; line-height: 1.6; color: #555; text-align: left; }
+    .details-box b { color: #333; }
+    .details-box ul { font-size: 14px; color: #555; text-align: left; padding-left: 20px; margin-bottom: 0;}
+    .details-box li { margin-bottom: 6px; }
 
     /* ปุ่มสแกนแบบกระพริบดึงดูดสายตา */
     .btn-start { 
-      background: linear-gradient(135deg, #ff0000, #aa0000); 
+      background: linear-gradient(135deg, #ff3333, #cc0000); 
       color: white; 
       border: none; 
-      padding: 16px 45px; 
-      font-size: 20px; 
+      padding: 15px 40px; 
+      font-size: 18px; 
       font-weight: 800; 
       border-radius: 30px; 
       cursor: pointer; 
-      box-shadow: 0 0 20px rgba(255, 0, 0, 0.5); 
+      box-shadow: 0 6px 15px rgba(255, 0, 0, 0.25); 
       transition: all 0.3s ease; 
       font-family: 'Prompt', sans-serif; 
       animation: pulseBtn 2s infinite, fadeInUp 1s ease-out 0.8s both;
     }
-    .btn-start:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(255, 0, 0, 0.8); }
+    .btn-start:hover { transform: scale(1.05); box-shadow: 0 8px 20px rgba(255, 0, 0, 0.4); }
     .btn-start:active { transform: scale(0.95); }
 
-    .dev-credit { margin-top: 30px; font-size: 12px; color: #666; animation: fadeInUp 1s ease-out 1s both;}
+    .dev-credit { margin-top: 20px; font-size: 12px; color: #999; animation: fadeInUp 1s ease-out 1s both;}
+
+    .bottom-sponsors-logo { 
+      width: 100%; 
+      max-width: 650px; 
+      object-fit: contain; 
+      margin-bottom: 15px; /* เปลี่ยนจาก margin-top เป็น bottom เพราะย้ายไปอยู่ข้างบนแล้ว */
+      border-radius: 10px;
+      animation: fadeInDown 1s ease-out;  /* เปลี่ยนให้ลอยลงมา */
+    }
 
     /* Keyframes แอนิเมชัน */
     @keyframes fadeInUp {
@@ -123,9 +188,9 @@
       to { opacity: 1; transform: translateY(0); }
     }
     @keyframes pulseBtn {
-      0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); }
-      70% { box-shadow: 0 0 0 15px rgba(255, 0, 0, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+      0% { box-shadow: 0 0 0 0 rgba(255, 51, 51, 0.4); }
+      70% { box-shadow: 0 0 0 15px rgba(255, 51, 51, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 51, 51, 0); }
     }
 
     /* --- ส่วน UI กล่องข้อความ AR ด้านล่าง (เหมือนเดิม) --- */
@@ -143,27 +208,30 @@
 <body>
 
   <div id="welcome-screen">
-    <div class="logo-header">
-      <img src="team-logo.jpg" alt="Isan Survivor" class="top-logo" onerror="this.style.display='none'">
-      <img src="project-logo.jpg" alt="ISAN ZERO OV" class="top-logo" onerror="this.style.display='none'">
+    <!-- โลโก้สปอนเซอร์ย้ายมาติดขอบบนสุด -->
+    <img src="photo/646449250_1591875532123870_365267974725471776_n.jpg" alt="Sponsors" class="bottom-sponsors-logo" onerror="this.style.display='none'">
+
+    <div class="main-content">
+      <div class="project-logo">Isan Survivor</div>
+      <div class="hackathon-badge">🏆 ISAN ZERO OV MEDIA HACKATHON</div>
+      
+      <div class="details-box">
+        <h3>⚠️ สแกนจานมรณะ ทะลวงภัยเงียบ</h3>
+        <p>โปรเจกต์นี้จะพาทุกท่านไปสำรวจความน่ากลัวของ "พยาธิใบไม้ตับ" และ "มะเร็งท่อน้ำดี" ที่แฝงมากับวัฒนธรรมการกินก้อยปลาดิบ</p>
+        <b>วิธีใช้งาน:</b>
+        <ul>
+          <li>กดปุ่ม <b>"เริ่มสแกน AR"</b> ด้านล่าง</li>
+          <li>อนุญาตให้เบราว์เซอร์เปิดกล้อง</li>
+          <li>นำกล้องไปส่องที่รูปภาพ <b>Marker (Hiro)</b></li>
+        </ul>
+      </div>
+      
+      <button class="btn-start" onclick="startAR()">📸 เริ่มสแกน AR</button>
+      <div class="dev-credit">Developed by Bass (Solo Dev) | Computer Science Student</div>
     </div>
     
-    <div class="project-logo">Isan Survivor</div>
-    <div class="hackathon-badge">🏆 ISAN ZERO OV MEDIA HACKATHON</div>
-    
-    <div class="details-box">
-      <h3>⚠️ สแกนจานมรณะ ทะลวงภัยเงียบ</h3>
-      <p>โปรเจกต์นี้จะพาทุกท่านไปสำรวจความน่ากลัวของ "พยาธิใบไม้ตับ" และ "มะเร็งท่อน้ำดี" ที่แฝงมากับวัฒนธรรมการกินก้อยปลาดิบ</p>
-      <b>วิธีใช้งาน:</b>
-      <ul>
-        <li>กดปุ่ม <b>"เริ่มสแกน AR"</b> ด้านล่าง</li>
-        <li>อนุญาตให้เบราว์เซอร์เปิดกล้อง</li>
-        <li>นำกล้องไปส่องที่รูปภาพ <b>Marker (Hiro)</b></li>
-      </ul>
-    </div>
-    
-    <button class="btn-start" onclick="startAR()">📸 เริ่มสแกน AR</button>
-    <div class="dev-credit">Developed by Bass (Solo Dev) | Computer Science Student</div>
+    <!-- โลโก้นีออนหลักย้ายมาติดขอบล่างสุด -->
+    <img src="photo/645840278_26384957581098420_6364140029624687392_n.png" alt="Isan Survivor Logo" class="main-neon-logo" style="margin-top: 20px; animation: fadeInUp 1s ease-out 1.2s both;" onerror="this.style.display='none'">
   </div>
 
   <div id="ar-ui-container">
@@ -180,27 +248,59 @@
     </div>
   </div>
 
-  <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false; trackingMethod: best;">
-    <a-assets>
-      <a-asset-item id="asset-model-0" src="model1.glb"></a-asset-item>
-      <a-asset-item id="asset-model-1" src="model2.glb"></a-asset-item>
-      <a-asset-item id="asset-model-2" src="model3.glb"></a-asset-item>
-      <a-asset-item id="asset-model-3" src="model4.glb"></a-asset-item>
-    </a-assets>
-
-    <a-marker preset="hiro">
-      <a-entity id="ar-model-0" gltf-model="#asset-model-0" scale="2 2 2" position="0 0.5 0" visible="true" animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear;"></a-entity>
-      <a-entity id="ar-model-1" gltf-model="#asset-model-1" scale="2 2 2" position="0 0.5 0" visible="false" animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear;"></a-entity>
-      <a-entity id="ar-model-2" gltf-model="#asset-model-2" scale="2 2 2" position="0 0.5 0" visible="false" animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear;"></a-entity>
-      <a-entity id="ar-model-3" gltf-model="#asset-model-3" scale="2 2 2" position="0 0.5 0" visible="false" animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear;"></a-entity>
-    </a-marker>
-    <a-entity camera></a-entity>
-  </a-scene>
+  <!-- สร้าง Container ว่างๆ เพื่อรอรับ A-Scene ตอนกดปุ่มเริ่ม (แก้จอดำ 100%) -->
+  <div id="ar-scene-container" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;"></div>
 
   <script>
     function startAR() {
-      document.getElementById("welcome-screen").style.display = "none";
-      document.getElementById("ar-ui-container").style.display = "block";
+      // 1. ขออนุญาตเปิดกล้องอย่างเป็นทางการก่อน
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+          .then(function(stream) {
+            // ปิดสตรีมกล้องชั่วคราว เพื่อคืนสิทธิ์ให้ AR.js ดึงไปใช้ซ้ำ
+            stream.getTracks().forEach(function(track) { track.stop(); });
+
+            // 2. ซ่อนหน้า Welcome และเปิด UI AR ด้านล่าง + เปิดแคนวาสใส
+            document.getElementById("welcome-screen").style.display = "none";
+            document.getElementById("ar-ui-container").style.display = "block";
+            document.getElementById("ar-scene-container").style.display = "block";
+
+            // 3. ทริค 100%: สร้างและโหลด <a-scene> โยนลงจอหลังจากได้สิทธิ์กล้องเท่านั้น! (ป้องกัน Race Condition ข้ามขั้นตอนจนกล้องดำ)
+            document.getElementById("ar-scene-container").innerHTML = `
+              <a-scene embedded vr-mode-ui="enabled: false"
+                loading-screen="enabled: false"
+                arjs="sourceType: webcam; debugUIEnabled: false; trackingMethod: best;"
+                renderer="logarithmicDepthBuffer: true; antialias: true; alpha: true"
+                device-orientation-permission-ui="enabled: false"
+                gesture-detector id="scene">
+                
+                <a-assets timeout="5000">
+                  <a-asset-item id="asset-model-0" src="plate.glb"></a-asset-item>    <!-- หน้า 1: จานก้อยปลาดิบ -->
+                  <a-asset-item id="asset-model-1" src="parasite.glb"></a-asset-item> <!-- หน้า 2: พยาธิใบไม้ตับ (ตัวอ่อน) -->
+                  <a-asset-item id="asset-model-2" src="parasite.glb"></a-asset-item> <!-- หน้า 3: ความเชื่อผิดๆ (พยาธิเติบโต/ฝังตัว) -->
+                  <a-asset-item id="asset-model-3" src="liver.glb"></a-asset-item>    <!-- หน้า 4: ผลลัพธ์สุดท้าย (ตับ/รอด) -->
+                </a-assets>
+            
+                <a-marker preset="hiro" emitevents="true">
+                  <!-- ใส่คำสั่ง drag-rotate (ใช้นิ้วปัดอิสระทุกแกน) และตั้งต้นด้วย -90 0 0 ทุกตัว -->
+                  <a-entity id="ar-model-0" gltf-model="#asset-model-0" scale="2 2 2" position="0 0.5 0" rotation="-90 0 0" visible="${currentIndex === 0 ? 'true' : 'false'}" auto-spin="speed: 0.5" drag-rotate></a-entity>
+                  <a-entity id="ar-model-1" gltf-model="#asset-model-1" scale="2 2 2" position="0 0.5 0" rotation="-90 0 0" visible="${currentIndex === 1 ? 'true' : 'false'}" auto-spin="speed: 0.5" drag-rotate></a-entity>
+                  <a-entity id="ar-model-2" gltf-model="#asset-model-2" scale="2 2 2" position="0 0.5 0" rotation="-90 0 0" visible="${currentIndex === 2 ? 'true' : 'false'}" auto-spin="speed: 0.5" drag-rotate></a-entity>
+                  <a-entity id="ar-model-3" gltf-model="#asset-model-3" scale="2 2 2" position="0 0.5 0" rotation="-90 0 0" visible="${currentIndex === 3 ? 'true' : 'false'}" auto-spin="speed: 0.5" drag-rotate></a-entity>
+                </a-marker>
+                
+                <a-entity camera>
+                  <a-cursor fuse="false" raycaster="objects: .clickable" visible="false"></a-cursor>
+                </a-entity>
+              </a-scene>
+            `;
+          })
+          .catch(function(err) {
+            alert("❌ ไม่สามารถเปิดกล้องได้!\n\nสาเหตุที่เป็นไปได้:\n1. คุณไม่อนุญาตสิทธิ์กล้อง\n2. เว็บไม่ได้เปิดผ่าน HTTPS หรือ Live Server\n\nข้อขัดข้อง: " + err.message);
+          });
+      } else {
+         alert("เบราว์เซอร์นี้ไม่รองรับระบบกล้อง หรือไม่ได้เปิดเว็บผ่านเครือข่ายความปลอดภัย (HTTPS)");
+      }
     }
 
     const cards = [
