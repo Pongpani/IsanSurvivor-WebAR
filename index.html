@@ -4,21 +4,30 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Isan Survivor - WebAR Experience</title>
-  
+
+  <!-- A-Frame and AR.js -->
   <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
   <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;800&display=swap');
     
-    /* 🔥 แก้บัคที่ 1: เปลี่ยนพื้นหลัง body ให้โปร่งใส ไม่งั้นมันจะบังกล้องมิด */
-    body { margin: 0; overflow: hidden; font-family: 'Prompt', sans-serif; background-color: transparent; }
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Prompt', sans-serif;
+      /* กฎเหล็ก: ห้ามสีทึบบังกล้อง */
+      background-color: transparent;
+    }
 
-    /* --- หน้า Welcome Screen --- */
+    /* --- Welcome Screen --- */
     #welcome-screen { 
       position: absolute; 
       top: 0; left: 0; width: 100%; height: 100%; 
-      background: #ffffff; /* หน้าต้อนรับยังคงเป็นสีขาวปกติ */
+      background: #ffffff; /* พื้นหลังสีขาวสำหรับ Welcome Screen เท่านั้น */
       color: #333; 
       z-index: 9999; 
       display: flex; 
@@ -39,10 +48,10 @@
     }
 
     .main-team-logo {
-      width: 80%;
-      max-width: 300px;
+      width: 85%;
+      max-width: 320px;
       object-fit: contain;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
       animation: fadeInDown 1s ease-out;
     }
 
@@ -93,8 +102,6 @@
     }
     .btn-start:active { transform: scale(0.95); }
 
-    .dev-credit { margin-top: 20px; font-size: 11px; color: #999; animation: fadeInUp 1s ease-out 0.5s both;}
-
     .bottom-sponsors-logo {
       width: 100%;
       max-width: 600px;
@@ -103,6 +110,7 @@
       animation: fadeInUp 1s ease-out 0.6s both;
     }
 
+    /* Keyframes */
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes pulseBtn {
@@ -111,25 +119,43 @@
       100% { box-shadow: 0 0 0 0 rgba(255, 51, 51, 0); }
     }
 
-    /* --- ส่วน UI กล่องข้อความ AR --- */
-    #ar-ui-container { display: none; position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: rgba(20, 20, 20, 0.95); border: 2px solid #ff3333; border-radius: 15px; color: white; padding: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); z-index: 999; box-sizing: border-box; backdrop-filter: blur(5px); }
-    .card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 12px; }
-    .card-title { font-size: 18px; font-weight: 800; margin: 0; }
-    .card-body { font-size: 15px; line-height: 1.6; min-height: 75px; color: #eee; }
-    .card-footer { display: flex; justify-content: space-between; margin-top: 15px; }
-    .nav-btn { background: #444; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-family: 'Prompt'; font-weight: 600; transition: 0.2s; }
+    /* --- AR UI Box (Glassmorphism) --- */
+    #ar-ui-container { 
+      display: none; 
+      position: absolute; 
+      bottom: 20px; 
+      left: 50%; 
+      transform: translateX(-50%); 
+      width: 90%; 
+      max-width: 400px; 
+      background: rgba(30, 30, 30, 0.75); 
+      border: 1px solid rgba(255, 255, 255, 0.2); 
+      border-radius: 15px; 
+      color: white; 
+      padding: 20px; 
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); 
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px); /* For Safari */
+      z-index: 999; 
+      box-sizing: border-box; 
+    }
+    .card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 10px; margin-bottom: 12px; }
+    .card-title { font-size: 18px; font-weight: 800; margin: 0; color: #00aaff; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+    .card-body { font-size: 15px; line-height: 1.6; min-height: 75px; color: #f0f0f0; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+    .card-footer { display: flex; justify-content: space-between; margin-top: 15px; gap: 10px; }
+    .nav-btn { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 10px 15px; border-radius: 8px; cursor: pointer; font-family: 'Prompt'; font-weight: 600; transition: 0.2s; flex: 1;}
     .nav-btn:active { transform: scale(0.95); }
-    .btn-next { background: #ff3333; font-weight: 800; box-shadow: 0 4px 10px rgba(255, 51, 51, 0.4); }
+    .btn-next { background: #ff3333; border: none; font-weight: 800; box-shadow: 0 4px 10px rgba(255, 51, 51, 0.4); }
   </style>
 </head>
 
 <body>
 
+  <!-- Welcome Screen -->
   <div id="welcome-screen">
     <div class="main-content">
-      <img src="team-logo.png" alt="Isan Survivor Logo" class="main-team-logo" onerror="this.style.display='none'">
-      
-      <div class="hackathon-badge">🏆 โครงการ ISAN ZERO OV MEDIA HACKATHON</div>
+      <img src="team-logo.png" alt="Team Logo" class="main-team-logo" onerror="this.style.display='none'">
+      <div class="hackathon-badge">🏆 โครงการ ISAN ZERO OV</div>
       
       <div class="details-box">
         <h3>⚠️ สแกนจานมรณะ ทะลวงภัยเงียบ</h3>
@@ -143,16 +169,17 @@
       </div>
       
       <button class="btn-start" onclick="startAR()">📸 เริ่มสแกน AR</button>
-      <div class="dev-credit">Developed by Bass (Solo Dev) | Computer Science Student</div>
     </div>
 
-    <img src="project-logo.png" alt="ISAN ZERO OV Sponsors" class="bottom-sponsors-logo" onerror="this.style.display='none'">
+    <!-- ล็อกติดขอบล่าง -->
+    <img src="project-logo.png" alt="Sponsors" class="bottom-sponsors-logo" onerror="this.style.display='none'">
   </div>
 
+  <!-- AR UI (โชว์ตอนสแกน) -->
   <div id="ar-ui-container">
     <div class="card-header">
-      <h3 id="ui-title" class="card-title" style="color: #00aaff;">🐟 จุดเริ่มต้น (วงจรพาหะ)</h3>
-      <span id="ui-counter" style="color: #aaa;">1/4</span>
+      <h3 id="ui-title" class="card-title">🐟 จุดเริ่มต้น (วงจรพาหะ)</h3>
+      <span id="ui-counter" style="color: #ddd;">1/4</span>
     </div>
     <div id="ui-desc" class="card-body">
       "รู้หรือไม่? พยาธิใบไม้ตับซ่อนตัวอยู่ในเนื้อของ ปลาน้ำจืดเกล็ดขาว การกินก้อยปลาดิบ คือการรับพยาธิเข้าสู่ร่างกายโดยตรง!"
@@ -163,72 +190,81 @@
     </div>
   </div>
 
-  <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false; trackingMethod: best;">
+  <!-- AR Scene -->
+  <a-scene vr-mode-ui="enabled: false" arjs="sourceType: webcam; debugUIEnabled: false; trackingMethod: best;">
     <a-assets>
-      <a-asset-item id="asset-model-0" src="model1.glb"></a-asset-item>
-      <a-asset-item id="asset-model-1" src="model2.glb"></a-asset-item>
-      <a-asset-item id="asset-model-2" src="model3.glb"></a-asset-item>
-      <a-asset-item id="asset-model-3" src="model4.glb"></a-asset-item>
+      <a-asset-item id="asset-model-1" src="model1.glb"></a-asset-item>
+      <a-asset-item id="asset-model-2" src="model2.glb"></a-asset-item>
+      <a-asset-item id="asset-model-3" src="model3.glb"></a-asset-item>
+      <a-asset-item id="asset-model-4" src="model4.glb"></a-asset-item>
     </a-assets>
 
     <a-marker preset="hiro">
-      <a-entity id="ar-model-0" gltf-model="#asset-model-0" scale="2 2 2" position="0 0.5 0" visible="true" animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear;"></a-entity>
-      <a-entity id="ar-model-1" gltf-model="#asset-model-1" scale="2 2 2" position="0 0.5 0" visible="false" animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear;"></a-entity>
+      <a-entity id="ar-model-1" gltf-model="#asset-model-1" scale="2 2 2" position="0 0.5 0" visible="true" animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear;"></a-entity>
       <a-entity id="ar-model-2" gltf-model="#asset-model-2" scale="2 2 2" position="0 0.5 0" visible="false" animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear;"></a-entity>
       <a-entity id="ar-model-3" gltf-model="#asset-model-3" scale="2 2 2" position="0 0.5 0" visible="false" animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear;"></a-entity>
+      <a-entity id="ar-model-4" gltf-model="#asset-model-4" scale="2 2 2" position="0 0.5 0" visible="false" animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear;"></a-entity>
     </a-marker>
     <a-entity camera></a-entity>
   </a-scene>
 
   <script>
-    // 🔥 แก้บัคที่ 2: ลบโค้ดขออนุญาตกล้องที่ซ้ำซ้อนออก ให้เหลือแค่สั่งซ่อนหน้า Welcome
-    function startAR() {
-      document.getElementById("welcome-screen").style.display = "none";
-      document.getElementById("ar-ui-container").style.display = "block";
-    }
-
+    // ฐานข้อมูลเนื้อหา
     const cards = [
-      { title: "🐟 จุดเริ่มต้น (วงจรพาหะ)", desc: `"รู้หรือไม่? พยาธิใบไม้ตับซ่อนตัวอยู่ในเนื้อของ ปลาน้ำจืดเกล็ดขาว (เช่น ปลาตะเพียน ปลาสร้อย) การกินก้อยปลาดิบ ปลาส้มดิบ คือการรับพยาธิเข้าสู่ร่างกายโดยตรง!"`, color: "#00aaff" },
-      { title: "⏳ ภัยเงียบ (ระยะฟักตัว)", desc: `"พยาธิ 1 ตัว มีชีวิตอยู่ได้หลายปี มันจะทำให้ท่อน้ำดีอักเสบเรื้อรัง... กระบวนการนี้กินเวลาฟักตัวนานถึง 20 ปี ก่อนจะกลายเป็น มะเร็งท่อน้ำดี โดยไม่มีอาการเตือน!"`, color: "#ffaa00" },
-      { title: "💊 ความเชื่อผิดๆ", desc: `"ช็อก! การกินดิบแล้วกินยาถ่ายพยาธิตามบ่อยๆ ไม่ได้ช่วยให้รอด... แต่การติดเชื้อซ้ำและใช้ยาซ้ำๆ กลับยิ่งไปกระตุ้นให้เกิดมะเร็งท่อน้ำดีเร็วขึ้น!"`, color: "#ff4444" },
-      { title: "🔥 ทางรอด (การป้องกัน)", desc: `"สุกเถอะครับ! ความร้อนทำลายพยาธิได้ 100% และหากคุณหรือคนในครอบครัวมีอายุ 40 ปีขึ้นไปและเคยกินดิบ อย่าลืมไปตรวจคัดกรองด้วยอัลตราซาวด์นะครับ"`, color: "#00cc66" }
+      { title: "🐟 จุดเริ่มต้น (วงจรพาหะ)", desc: '"รู้หรือไม่? พยาธิใบไม้ตับซ่อนตัวอยู่ในเนื้อของ ปลาน้ำจืดเกล็ดขาว (เช่น ปลาตะเพียน ปลาสร้อย) การกินก้อยปลาดิบ ปลาส้มดิบ คือการรับพยาธิเข้าสู่ร่างกายโดยตรง!"', color: "#00aaff" },
+      { title: "⏳ ภัยเงียบ (ระยะฟักตัว)", desc: '"พยาธิ 1 ตัว มีชีวิตอยู่ได้หลายปี มันจะทำให้ท่อน้ำดีอักเสบเรื้อรัง... กระบวนการนี้กินเวลาฟักตัวนานถึง 20 ปี ก่อนจะกลายเป็น มะเร็งท่อน้ำดี โดยไม่มีอาการเตือน!"', color: "#ffaa00" },
+      { title: "💊 ความเชื่อผิดๆ", desc: '"ช็อก! การกินดิบแล้วกินยาถ่ายพยาธิตามบ่อยๆ ไม่ได้ช่วยให้รอด... แต่การติดเชื้อซ้ำและใช้ยาซ้ำๆ กลับยิ่งไปกระตุ้นให้เกิดมะเร็งท่อน้ำดีเร็วขึ้น!"', color: "#ff4444" },
+      { title: "🔥 ทางรอด (การป้องกัน)", desc: '"สุกเถอะครับ! ความร้อนทำลายพยาธิได้ 100% และหากคุณหรือคนในครอบครัวมีอายุ 40 ปีขึ้นไปและเคยกินดิบ อย่าลืมไปตรวจคัดกรองด้วยอัลตราซาวด์นะครับ"', color: "#00cc66" }
     ];
 
     let currentIndex = 0;
 
+    function startAR() {
+      // ซ่อนหน้า Welcome ปล่อยให้ AR.js จัดการกล้องเอง
+      document.getElementById("welcome-screen").style.display = "none";
+      document.getElementById("ar-ui-container").style.display = "block";
+    }
+
     function changeCard(step) {
       currentIndex += step;
+      
+      // อัปเดต UI ข้อความ
       document.getElementById("ui-title").innerText = cards[currentIndex].title;
       document.getElementById("ui-title").style.color = cards[currentIndex].color;
       document.getElementById("ui-desc").innerText = cards[currentIndex].desc;
       document.getElementById("ui-counter").innerText = (currentIndex + 1) + "/" + cards.length;
+      
+      // อัปเดตปุ่มย้อนกลับ
       document.getElementById("btn-prev").style.visibility = (currentIndex === 0) ? "hidden" : "visible";
       
-      for(let i = 0; i < 4; i++) {
-        let modelEntity = document.getElementById("ar-model-" + i);
-        if(modelEntity) {
-          if(i === currentIndex) {
-            modelEntity.setAttribute("visible", "true");
-          } else {
-            modelEntity.setAttribute("visible", "false");
-          }
-        }
-      }
-
+      // อัปเดตปุ่มถัดไป
       let btnNext = document.getElementById("btn-next");
       if (currentIndex === cards.length - 1) {
         btnNext.innerText = "สนใจเล่น VR ติดต่อที่บูธ! 🎮";
         btnNext.style.background = "#00cc66";
         btnNext.style.boxShadow = "0 4px 10px rgba(0, 204, 102, 0.4)";
-        btnNext.onclick = function() { alert("เชิญสัมผัสประสบการณ์เต็มรูปแบบในแว่น VR ที่บูธของเราครับ!"); };
+        btnNext.onclick = function() { 
+          alert("เชิญสัมผัสประสบการณ์เต็มรูปแบบในแว่น VR ที่บูธของเราครับ!"); 
+        };
       } else {
         btnNext.innerHTML = "ถัดไป &raquo;";
         btnNext.style.background = "#ff3333";
         btnNext.style.boxShadow = "0 4px 10px rgba(255, 51, 51, 0.4)";
         btnNext.onclick = function() { changeCard(1); };
       }
+
+      // วนลูปเช็ก ID ของโมเดลและเปิดปิดตาม index ปัจจุบัน (model1-4 ใช้ index + 1)
+      for(let i = 1; i <= 4; i++) {
+        let modelEntity = document.getElementById("ar-model-" + i);
+        if(modelEntity) {
+          if(i === (currentIndex + 1)) {
+            modelEntity.setAttribute("visible", "true");
+          } else {
+            modelEntity.setAttribute("visible", "false");
+          }
+        }
+      }
     }
   </script>
-
 </body>
 </html>
