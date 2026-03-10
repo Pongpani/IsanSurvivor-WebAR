@@ -189,8 +189,26 @@
 
   <script>
     function startAR() {
-      document.getElementById("welcome-screen").style.display = "none";
-      document.getElementById("ar-ui-container").style.display = "block";
+      // ขอสิทธิ์เปิดกล้องอย่างชัดเจน (แจ้งเตือนขออนุญาต)
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+          .then(function(stream) {
+            // หยุด stream ชั่วคราวเพื่อปล่อยให้ A-Frame/AR.js ใช้งานกล้องต่อได้โดยไม่ชนกัน
+            stream.getTracks().forEach(function(track) { track.stop(); });
+            
+            // ซ่อนหน้า Welcome และแสดง UI ของ AR
+            document.getElementById("welcome-screen").style.display = "none";
+            document.getElementById("ar-ui-container").style.display = "block";
+            
+            // แก้บัคพื้นหลัง body บังวิดีโอกล้อง (ปรับเป็นโปร่งใสหลังจากเข้า AR)
+            document.body.style.backgroundColor = "transparent";
+          })
+          .catch(function(err) {
+            alert("ไม่สามารถเปิดกล้องได้: " + err.message + "\n\nคำแนะนำ:\n1. กรุณากดอนุญาตสิทธิ์การใช้งานกล้อง\n2. หากเปิดบนมือถือ ต้องใช้งานผ่านลิงก์ HTTPS เท่านั้น\n3. หากทดสอบในคอมพิวเตอร์ ให้เปิดผ่าน Localhost (เช่น Live Server)");
+          });
+      } else {
+        alert("เบราว์เซอร์ไม่รองรับการเปิดกล้อง!\nกรุณาใช้งานผ่าน HTTPS หรือรันผ่าน Localhost (Live Server) แทนการคลิกเปิดไฟล์ธรรมดาครับ");
+      }
     }
 
     const cards = [
