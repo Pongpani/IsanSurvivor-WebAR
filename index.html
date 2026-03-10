@@ -11,13 +11,14 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;800&display=swap');
     
-    body { margin: 0; overflow: hidden; font-family: 'Prompt', sans-serif; background-color: #ffffff; }
+    /* 🔥 แก้บัคที่ 1: เปลี่ยนพื้นหลัง body ให้โปร่งใส ไม่งั้นมันจะบังกล้องมิด */
+    body { margin: 0; overflow: hidden; font-family: 'Prompt', sans-serif; background-color: transparent; }
 
-    /* --- หน้า Welcome Screen (ธีมพื้นขาว Clean & Minimal) --- */
+    /* --- หน้า Welcome Screen --- */
     #welcome-screen { 
       position: absolute; 
       top: 0; left: 0; width: 100%; height: 100%; 
-      background: #ffffff; /* พื้นหลังสีขาว */
+      background: #ffffff; /* หน้าต้อนรับยังคงเป็นสีขาวปกติ */
       color: #333; 
       z-index: 9999; 
       display: flex; 
@@ -28,7 +29,6 @@
       box-sizing: border-box; 
     }
 
-    /* โซนเนื้อหาตรงกลาง */
     .main-content {
       display: flex;
       flex-direction: column;
@@ -38,12 +38,11 @@
       width: 100%;
     }
 
-    /* 🔥 โลโก้ทีมด้านบนสุด (ทำหน้าที่แทนชื่อโปรเจกต์) */
     .main-team-logo {
-      width: 85%;
-      max-width: 320px;
+      width: 80%;
+      max-width: 300px;
       object-fit: contain;
-      margin-bottom: 20px; /* เพิ่มระยะห่างด้านล่างนิดหน่อย */
+      margin-bottom: 15px;
       animation: fadeInDown 1s ease-out;
     }
 
@@ -59,7 +58,6 @@
       animation: fadeInUp 1s ease-out 0.2s both;
     }
 
-    /* กล่องข้อความ */
     .details-box { 
       background: #ffffff; 
       border: 1px solid #eee; 
@@ -79,7 +77,6 @@
     .details-box ul { font-size: 13px; color: #555; text-align: left; padding-left: 20px; margin-bottom: 0;}
     .details-box li { margin-bottom: 6px; }
 
-    /* ปุ่มสแกนแบบกระพริบ */
     .btn-start { 
       background: linear-gradient(135deg, #ff3333, #cc0000); 
       color: white; 
@@ -98,7 +95,6 @@
 
     .dev-credit { margin-top: 20px; font-size: 11px; color: #999; animation: fadeInUp 1s ease-out 0.5s both;}
 
-    /* 🔥 โลโก้สปอนเซอร์ยาวๆ ด้านล่างสุด */
     .bottom-sponsors-logo {
       width: 100%;
       max-width: 600px;
@@ -107,7 +103,6 @@
       animation: fadeInUp 1s ease-out 0.6s both;
     }
 
-    /* Keyframes แอนิเมชัน */
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes pulseBtn {
@@ -116,7 +111,7 @@
       100% { box-shadow: 0 0 0 0 rgba(255, 51, 51, 0); }
     }
 
-    /* --- ส่วน UI กล่องข้อความ AR ด้านล่าง --- */
+    /* --- ส่วน UI กล่องข้อความ AR --- */
     #ar-ui-container { display: none; position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: rgba(20, 20, 20, 0.95); border: 2px solid #ff3333; border-radius: 15px; color: white; padding: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); z-index: 999; box-sizing: border-box; backdrop-filter: blur(5px); }
     .card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 12px; }
     .card-title { font-size: 18px; font-weight: 800; margin: 0; }
@@ -131,7 +126,6 @@
 <body>
 
   <div id="welcome-screen">
-    
     <div class="main-content">
       <img src="team-logo.png" alt="Isan Survivor Logo" class="main-team-logo" onerror="this.style.display='none'">
       
@@ -153,7 +147,6 @@
     </div>
 
     <img src="project-logo.png" alt="ISAN ZERO OV Sponsors" class="bottom-sponsors-logo" onerror="this.style.display='none'">
-    
   </div>
 
   <div id="ar-ui-container">
@@ -188,27 +181,10 @@
   </a-scene>
 
   <script>
+    // 🔥 แก้บัคที่ 2: ลบโค้ดขออนุญาตกล้องที่ซ้ำซ้อนออก ให้เหลือแค่สั่งซ่อนหน้า Welcome
     function startAR() {
-      // ขอสิทธิ์เปิดกล้องอย่างชัดเจน (แจ้งเตือนขออนุญาต)
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-          .then(function(stream) {
-            // หยุด stream ชั่วคราวเพื่อปล่อยให้ A-Frame/AR.js ใช้งานกล้องต่อได้โดยไม่ชนกัน
-            stream.getTracks().forEach(function(track) { track.stop(); });
-            
-            // ซ่อนหน้า Welcome และแสดง UI ของ AR
-            document.getElementById("welcome-screen").style.display = "none";
-            document.getElementById("ar-ui-container").style.display = "block";
-            
-            // แก้บัคพื้นหลัง body บังวิดีโอกล้อง (ปรับเป็นโปร่งใสหลังจากเข้า AR)
-            document.body.style.backgroundColor = "transparent";
-          })
-          .catch(function(err) {
-            alert("ไม่สามารถเปิดกล้องได้: " + err.message + "\n\nคำแนะนำ:\n1. กรุณากดอนุญาตสิทธิ์การใช้งานกล้อง\n2. หากเปิดบนมือถือ ต้องใช้งานผ่านลิงก์ HTTPS เท่านั้น\n3. หากทดสอบในคอมพิวเตอร์ ให้เปิดผ่าน Localhost (เช่น Live Server)");
-          });
-      } else {
-        alert("เบราว์เซอร์ไม่รองรับการเปิดกล้อง!\nกรุณาใช้งานผ่าน HTTPS หรือรันผ่าน Localhost (Live Server) แทนการคลิกเปิดไฟล์ธรรมดาครับ");
-      }
+      document.getElementById("welcome-screen").style.display = "none";
+      document.getElementById("ar-ui-container").style.display = "block";
     }
 
     const cards = [
