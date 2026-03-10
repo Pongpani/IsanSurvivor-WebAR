@@ -282,11 +282,11 @@
                 </a-assets>
             
                 <a-marker preset="hiro" emitevents="true">
-                  <!-- ใส่คำสั่ง drag-rotate (ใช้นิ้วปัดอิสระทุกแกน) และตั้งต้นด้วย -90 0 0 ทุกตัว -->
-                  <a-entity id="ar-model-0" gltf-model="#asset-model-0" scale="2 2 2" position="0 0.5 0" rotation="-90 0 0" visible="${currentIndex === 0 ? 'true' : 'false'}" auto-spin="speed: 0.5" drag-rotate></a-entity>
-                  <a-entity id="ar-model-1" gltf-model="#asset-model-1" scale="2 2 2" position="0 0.5 0" rotation="-90 0 0" visible="${currentIndex === 1 ? 'true' : 'false'}" auto-spin="speed: 0.5" drag-rotate></a-entity>
-                  <a-entity id="ar-model-2" gltf-model="#asset-model-2" scale="2 2 2" position="0 0.5 0" rotation="-90 0 0" visible="${currentIndex === 2 ? 'true' : 'false'}" auto-spin="speed: 0.5" drag-rotate></a-entity>
-                  <a-entity id="ar-model-3" gltf-model="#asset-model-3" scale="2 2 2" position="0 0.5 0" rotation="-90 0 0" visible="${currentIndex === 3 ? 'true' : 'false'}" auto-spin="speed: 0.5" drag-rotate></a-entity>
+                  <!-- เพิ่มขนาด Scale เริ่มต้นจาก 2 2 2 เป็น 4 4 4 ให้ใหญ่เต็มตาตีบวกมองเห็นชัดเจนขึ้น 2 เท่า! -->
+                  <a-entity id="ar-model-0" gltf-model="#asset-model-0" scale="4 4 4" position="0 0.5 0" rotation="-90 0 0" visible="${currentIndex === 0 ? 'true' : 'false'}" auto-spin="speed: 0.5" drag-rotate></a-entity>
+                  <a-entity id="ar-model-1" gltf-model="#asset-model-1" scale="4 4 4" position="0 0.5 0" rotation="-90 0 0" visible="${currentIndex === 1 ? 'true' : 'false'}" auto-spin="speed: 0.5" drag-rotate></a-entity>
+                  <a-entity id="ar-model-2" gltf-model="#asset-model-2" scale="4 4 4" position="0 0.5 0" rotation="-90 0 0" visible="${currentIndex === 2 ? 'true' : 'false'}" auto-spin="speed: 0.5" drag-rotate></a-entity>
+                  <a-entity id="ar-model-3" gltf-model="#asset-model-3" scale="4 4 4" position="0 0.5 0" rotation="-90 0 0" visible="${currentIndex === 3 ? 'true' : 'false'}" auto-spin="speed: 0.5" drag-rotate></a-entity>
                 </a-marker>
                 
                 <a-entity camera>
