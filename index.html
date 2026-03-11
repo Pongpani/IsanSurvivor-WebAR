@@ -19,6 +19,8 @@
         const onDown = (e) => {
           this.isDragging = true;
           this.previousPosition = this.getMousePosition(e);
+          // พอเอานิ้วแตะ/คลิกปุ๊บ ให้หยุดหมุนอัตโนมัติทันทีแบบถาวร
+          this.el.removeAttribute('auto-spin');
         };
 
         const onUp = () => {
